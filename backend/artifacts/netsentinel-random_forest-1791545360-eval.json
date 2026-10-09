@@ -1,0 +1,86 @@
+{
+  "model_id": "netsentinel-random_forest-1791545360",
+  "algorithm": "RandomForestClassifier",
+  "accuracy": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
+  "macro_f1": 1.0,
+  "total_test_samples": 120,
+  "labels": [
+    "normal",
+    "congestion",
+    "packet_loss",
+    "latency_spike",
+    "hardware_failure"
+  ],
+  "confusion_matrix": [
+    [
+      24,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      24,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      24,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      24,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      24
+    ]
+  ],
+  "per_class_metrics": {
+    "normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 24
+    },
+    "congestion": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 24
+    },
+    "packet_loss": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 24
+    },
+    "latency_spike": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 24
+    },
+    "hardware_failure": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 24
+    }
+  },
+  "trained_at": "2026-10-09T16:59:20.396187"
+}

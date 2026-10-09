@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: #030712;
+  color: #f1f5f9;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Antigravity Spatial Glass Utilities */
+.spatial-glass {
+  background: rgba(11, 15, 25, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+.spatial-glass-subtle {
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.spatial-glass-crimson {
+  background: rgba(244, 63, 94, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  box-shadow: 0 0 35px -5px rgba(244, 63, 94, 0.3);
+}
+
+.spatial-glass-cyan {
+  background: rgba(6, 182, 212, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.25);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Gravitational Shockwave Rings */
+@keyframes sinkhole-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  50% { opacity: 0.4; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.gravitational-ring-1 {
+  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.gravitational-ring-2 {
+  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.7s;
+}
+
+.gravitational-ring-3 {
+  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.4s;
+}
