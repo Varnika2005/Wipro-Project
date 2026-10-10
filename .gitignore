@@ -36,6 +36,9 @@ env/
 *.sqlite
 netsentinel.db
 backend/netsentinel.db
+# ML Artifacts
+backend/artifacts/
+*.joblib
 
 # Node & Frontend
 node_modules/
