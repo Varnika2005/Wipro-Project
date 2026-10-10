@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.device import Device, Link
 from app.models.telemetry import TelemetryMetric
 import datetime
+import os
 
 INITIAL_DEVICES = [
     # Edge / Gateway
@@ -236,11 +237,17 @@ def seed_topology(db: Session, overwrite: bool = False):
     from app.models.user import User
     from app.services.auth_service import AuthService
 
-    default_users = [
-        {"id": "usr-admin-01", "username": "admin", "email": "admin@netsentinel.ai", "password": "Admin@NetSentinel2026!", "role": "admin"},
-        {"id": "usr-operator-01", "username": "operator", "email": "operator@netsentinel.ai", "password": "Operator@NetSentinel2026!", "role": "operator"},
-        {"id": "usr-viewer-01", "username": "viewer", "email": "viewer@netsentinel.ai", "password": "Viewer@NetSentinel2026!", "role": "viewer"},
-    ]
+    admin_pass = os.getenv("INITIAL_ADMIN_PASSWORD")
+    operator_pass = os.getenv("INITIAL_OPERATOR_PASSWORD")
+    viewer_pass = os.getenv("INITIAL_VIEWER_PASSWORD")
+
+    default_users = []
+    if admin_pass:
+        default_users.append({"id": "usr-admin-01", "username": "admin", "email": "admin@netsentinel.ai", "password": admin_pass, "role": "admin"})
+    if operator_pass:
+        default_users.append({"id": "usr-operator-01", "username": "operator", "email": "operator@netsentinel.ai", "password": operator_pass, "role": "operator"})
+    if viewer_pass:
+        default_users.append({"id": "usr-viewer-01", "username": "viewer", "email": "viewer@netsentinel.ai", "password": viewer_pass, "role": "viewer"})
 
     for u in default_users:
         existing_user = db.query(User).filter(User.username == u["username"]).first()

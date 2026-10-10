@@ -2,8 +2,11 @@
 echo =====================================================================
 echo  Starting NetSentinel AI (Backend FastAPI + Frontend Vite)
 echo =====================================================================
+echo Cleaning up existing processes on ports 8000 and 5173...
+for /f "tokens=5" %%a in ('netstat -aon ^| find ":8000" ^| find "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
+for /f "tokens=5" %%a in ('netstat -aon ^| find ":5173" ^| find "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
 
-start "NetSentinel AI Backend (FastAPI)" cmd /k "cd /d %~dp0backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
+start "NetSentinel AI Backend (FastAPI)" cmd /k "cd /d %~dp0backend && call venv\Scripts\activate.bat && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
 start "NetSentinel AI Frontend (Vite)" cmd /k "cd /d %~dp0frontend && npm run dev"
 
 echo.

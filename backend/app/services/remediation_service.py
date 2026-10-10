@@ -92,15 +92,9 @@ class RemediationService:
         if not device:
             raise ValueError(f"Device {target_device_id} not found")
 
-        policy = REMEDIATION_POLICIES.get(
-            action_type,
-            {
-                "description": "Generic parameter reset",
-                "effect": "Restores baseline telemetry",
-                "safety": "Standard operational caution required",
-                "projected_overrides": {"cpu_utilization_pct": 20.0, "latency_ms": 3.0}
-            }
-        )
+        if action_type not in REMEDIATION_POLICIES:
+            raise ValueError(f"Unknown or unsupported remediation action: '{action_type}'")
+        policy = REMEDIATION_POLICIES[action_type]
 
         # Retrieve current metric
         latest = device.telemetry[-1] if device.telemetry else None
@@ -166,6 +160,9 @@ class RemediationService:
         device = db.query(Device).filter(Device.id == target_device_id).first()
         if not device:
             raise ValueError(f"Device {target_device_id} not found")
+
+        if action_type not in REMEDIATION_POLICIES:
+            raise ValueError(f"Unknown or unsupported remediation action: '{action_type}'")
 
         # 1. Update status
         device.status = "healthy"

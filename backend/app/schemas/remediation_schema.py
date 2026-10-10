@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Literal
 from app.schemas.telemetry_schema import TelemetryFeatures
 
 
 class RemediationSimulateRequest(BaseModel):
-    action_type: str  # "reroute_traffic", "restart_service", "throttle_rate", "switch_backup_link", "cool_system"
+    action_type: Literal["reroute_traffic", "restart_service", "throttle_rate", "switch_backup_link", "cool_system"]
     target_device_id: str
 
 
@@ -23,7 +23,7 @@ class RemediationSimulateResponse(BaseModel):
 
 
 class RemediationApplyRequest(BaseModel):
-    action_type: str
+    action_type: Literal["reroute_traffic", "restart_service", "throttle_rate", "switch_backup_link", "cool_system"]
     target_device_id: str
 
 

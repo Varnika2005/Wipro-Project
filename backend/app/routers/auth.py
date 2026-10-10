@@ -7,6 +7,7 @@ from app.models.user import User, AuditLog
 from app.schemas.auth_schema import UserLoginRequest, UserResponse, AuditLogResponse
 from app.services.auth_service import AuthService, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 from app.dependencies.auth import get_current_user, require_role
+from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Zero-Trust Authentication & RBAC"])
 
@@ -54,7 +55,7 @@ def login(
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=False,  # Set to True in production HTTPS
+        secure=settings.ENVIRONMENT == "production",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
@@ -64,7 +65,7 @@ def login(
         value=refresh_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.ENVIRONMENT == "production",
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
         path="/api/auth",
     )
@@ -123,7 +124,7 @@ def refresh_session(
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.ENVIRONMENT == "production",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
     )
@@ -133,7 +134,7 @@ def refresh_session(
         value=new_refresh_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.ENVIRONMENT == "production",
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
         path="/api/auth",
     )

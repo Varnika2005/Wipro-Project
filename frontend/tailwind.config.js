@@ -8,28 +8,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        spatial: {
-          void: '#030712',          // Deep cosmic void
-          slate: '#0B0F19',         // Deep void glass slate
-          surface: '#111827',       // Spatial card surface
-          border: 'rgba(255, 255, 255, 0.08)', // Refraction edge
-          cyan: '#06B6D4',          // Neon cyan pulse
-          emerald: '#10B981',       // Bioluminescent emerald
-          crimson: '#F43F5E',       // Radiant crimson shockwave
-          amber: '#F59E0B',         // Warning plasma
-          purple: '#8B5CF6',        // AIOps quantum violet
+        nms: {
+          background: '#F8F9FA',    // Warm light-gray workspace
+          surface: '#FFFFFF',       // White content surfaces
+          text: '#1E293B',          // Deep graphite text
+          textMuted: '#64748B',     // Muted text
+          border: '#E2E8F0',        // Muted neutral borders
+          primary: '#4F46E5',       // Restrained indigo interaction
+          primaryHover: '#4338CA',  // Indigo hover
+          healthy: '#16A34A',       // Green for healthy
+          warning: '#D97706',       // Amber for warnings
+          critical: '#DC2626',      // Red for critical
+          info: '#0284C7',          // Blue for info
         }
       },
       fontFamily: {
-        sans: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
-        display: ['"Space Grotesk"', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'spatial-glass': '0 8px 32px 0 rgba(0, 0, 0, 0.7)',
-        'glow-cyan': '0 0 30px -5px rgba(6, 182, 212, 0.35)',
-        'glow-crimson': '0 0 35px -5px rgba(244, 63, 94, 0.45)',
-        'glow-emerald': '0 0 30px -5px rgba(16, 185, 129, 0.35)',
+        'panel': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
       }
     },
   },

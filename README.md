@@ -38,7 +38,7 @@ NetSentinel AI is an end-to-end Network Operations Center (NOC) intelligence sys
 
 | Layer | Technologies |
 |---|---|
-| **Frontend** | React 18, TypeScript, Tailwind CSS (NOC Dark Theme), Recharts, Lucide React, Axios |
+| **Frontend** | React 18, TypeScript, Tailwind CSS (professional light NOC UI), Recharts, Lucide React, Axios |
 | **Backend** | Python 3.10+, FastAPI, Pydantic v2, SQLAlchemy 2.0, SQLite |
 | **Machine Learning** | scikit-learn (`RandomForestClassifier`, `StandardScaler`), pandas, numpy, joblib |
 | **Graph Analysis** | NetworkX (Topological causal traversal) |
@@ -57,6 +57,8 @@ Double-click `run_dev.bat` or run in terminal:
 ```powershell
 .\run_dev.bat
 ```
+
+**Note on Database & Data:** The backend automatically provisions a SQLite database and seeds the topology upon startup. No manual initialization is required.
 
 ### 2. Manual Execution
 
@@ -80,6 +82,31 @@ npm run dev
 Frontend dashboard will be accessible at:
 - **NOC Dashboard:** `http://127.0.0.1:5173`
 
+### 3. Demonstration Credentials
+By default, the application will automatically prompt for login if no active session is found. To initialize the first administrator in a fresh deployment, you **must** supply an environment variable:
+- `INITIAL_ADMIN_PASSWORD`
+
+Login with:
+- **Username:** `admin`
+- **Password:** *(the value you provided in `INITIAL_ADMIN_PASSWORD`)*
+- **Role:** `admin` (Required for remediation actions)
+
+### 4. Configuration & Environment Variables
+The application defaults to safe local configuration using standard ports (`8000` for backend, `5173` for frontend). To override these settings or deploy securely, use environment variables in a `.env` file or export them:
+- `ENVIRONMENT`: Set to `production` to enforce strict security checks, `Secure` cookie flags, and require a 32+ character JWT secret.
+- `JWT_SECRET_KEY`: Cryptographic key for signing session tokens (Mandatory in production).
+- `INITIAL_ADMIN_PASSWORD`: Password to seed the first `admin` user.
+- `API_PREFIX`: Modify API routing prefix (default: `/api`)
+- `CORS_ORIGINS`: Set specific CORS origins (default: `http://localhost:5173,http://127.0.0.1:5173`)
+- `DATABASE_URL`: Change the SQLAlchemy connection string (default: `sqlite:///./netsentinel_ai.db`)
+
+### 5. Architectural Boundaries & Security
+NetSentinel AI implements a strict Zero-Trust architectural boundary between the UI client and the FastAPI backend:
+- **Authentication:** Stateless JSON Web Tokens (JWT) issued as `HttpOnly`, `SameSite=Lax` secure cookies to mitigate XSS and CSRF risks.
+- **Role-Based Access Control (RBAC):** Server-side route dependencies restrict critical infrastructure endpoints. `viewer` (read-only telemetry), `operator` (simulation injection), and `admin` (remediation commit).
+- **Validation:** Pydantic strictly validates all inbound API schemas, utilizing `Literal` types to reject unknown simulation or remediation commands.
+
+
 ---
 
 ## 🧪 Automated Testing & Verification
@@ -92,11 +119,11 @@ cd backend
 python -m pytest -v
 ```
 
-### Verified Test Matrix (17 Automated Tests):
+### Test Coverage
 * `tests/test_api_endpoints.py`: All REST API contracts (200 OK, Pydantic validation)
 * `tests/test_database_init.py`: Schema creation and initial 12-node enterprise topology seeding
 * `tests/test_simulation.py`: Physical bounds, repeatability with seeds, cascading propagation
-* `tests/test_ml_pipeline.py`: Balanced synthetic datasets, train/test split, macro F1 $> 0.85$, prediction risk score
+* `tests/test_ml_pipeline.py`: Balanced synthetic datasets, stratified hold-out split, macro F1 $> 0.85$, prediction risk score. These are simulator-distribution metrics, not production accuracy.
 * `tests/test_rca_correlation.py`: Graph-based upstream root cause vs. downstream symptom isolation
 * `tests/test_remediation.py`: Non-destructive What-If digital twin simulation and live action commit
 
@@ -123,8 +150,24 @@ python -m pytest -v
 ## 🔬 Demonstration Workflow for Evaluation
 
 1. **Baseline State**: Open `http://127.0.0.1:5173`. Notice 12 healthy nodes, animated cyan traffic lines, and 100% Fleet Health.
-2. **Model Evaluation**: Click the **AI Predictor & Eval** tab. Review the held-out test evaluation report showing verified accuracy, macro F1 score, and the 5x5 Confusion Matrix.
-3. **Fault Injection**: In the **NOC Topology** tab, select `Core Router Alpha` and click **Hardware Overload**.
-4. **Alarm Storm & Cascade**: Observe the status shift to *Critical Incident Active*. Notice `Core Router Alpha` receives a glowing `ROOT CAUSE` badge, while connected downstream distribution switches receive `CASCADING SYMPTOM` tags.
-5. **RCA View**: Click the **RCA & Correlation** tab. Note how raw alarms are correlated, noise is suppressed, and the blast radius is isolated.
+2. **Model Evaluation**: Click the **Model** tab. Review the held-out simulated-data evaluation report, including accuracy, macro F1 score, and the 5x5 confusion matrix.
+3. **Fault Injection**: In the **Overview** tab, select `Core Router Alpha` and click the **Hardware Overload** scenario card.
+4. **Alarm Storm & Cascade**: Observe the status shift to *Critical Incident*. Notice the selected node receives a `ROOT CAUSE` badge, while related nodes receive `SYMPTOM` tags.
+5. **RCA View**: Click the **Incidents** tab. Note how raw alarms are correlated, noise is suppressed, and the blast radius is isolated.
 6. **Safe Remediation**: Click the **Remediation Sandbox** tab. Click **Simulate Policy (Safe Digital Twin)**. Review the projected risk reduction from 100 to 0. Click **Commit & Resolve Fault** to restore the network back to 100% fleet health.
+
+---
+
+## ⚠️ Limitations & Troubleshooting
+
+### Synthetic-Data ML Limitations
+The machine learning classifier (`RandomForestClassifier`) relies on **synthetic simulated data** generated by the built-in deterministic simulation engine. While the system demonstrates real scikit-learn API usage, feature extraction, and mathematically-consistent telemetry, the evaluation metrics (Precision/Recall/F1) **measure the model's accuracy on the same simulator distribution**. These metrics do not guarantee operational performance on real-world, highly stochastic hardware telemetry. For production use, the model must be re-trained on empirical historical network data.
+
+### Known Limitations
+- The topology graph utilizes synthetic spatial coordinates and scales horizontally to a maximum interactive dimension.
+- Database records are stored locally via SQLite, which lacks the concurrency control required for massive true-scale datacenter telemetry streams.
+
+### Troubleshooting
+- **Connection Refused (`ERR_CONNECTION_REFUSED`)**: Verify the backend is running at `127.0.0.1:8000`. Double-check there are no conflicting services on port 8000.
+- **Vite Warning (Chunk Size)**: A warning during `npm run build` is expected for the large bundled React modules. The application employs route-level code splitting using `React.lazy()` to mitigate initial load overhead.
+- **Simulation Desynchronization**: If the frontend topology differs from injected scenarios, click **Reset Simulation** in the top navigation bar to flush the database and restore a healthy baseline.

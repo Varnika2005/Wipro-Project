@@ -6,6 +6,8 @@ from app.database import get_db
 from app.models.device import Device
 from app.services.ml_service import MLService
 from app.services.explainer_service import ExplainerService
+from app.dependencies.auth import require_role, get_current_user
+from app.models.user import User
 from app.schemas.ml_schema import (
     TrainRequest,
     EvaluationReportResponse,
@@ -18,7 +20,11 @@ router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
 @router.post("/train", response_model=EvaluationReportResponse)
-def train_model(req: TrainRequest, db: Session = Depends(get_db)):
+def train_model(
+    req: TrainRequest, 
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_role("admin"))
+):
     """Trains a new scikit-learn classifier and persists evaluation metrics."""
     try:
         report = MLService.train_and_persist(
@@ -34,7 +40,7 @@ def train_model(req: TrainRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/evaluation", response_model=EvaluationReportResponse)
-def get_evaluation():
+def get_evaluation(current_user: User = Depends(get_current_user)):
     """Returns held-out test evaluation report, accuracy, precision, recall, F1, and confusion matrix."""
     try:
         return MLService.get_evaluation_report()
@@ -43,7 +49,11 @@ def get_evaluation():
 
 
 @router.post("/predict", response_model=PredictionResponse)
-def predict_fault(req: PredictionRequest, db: Session = Depends(get_db)):
+def predict_fault(
+    req: PredictionRequest, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     Predicts fault category, calibrated risk score, and feature attributions.
     Accepts either an existing device_id (uses latest telemetry) or explicit metrics dictionary.

@@ -1,0 +1,101 @@
+{
+  "model_id": "netsentinel-random_forest-1791599698",
+  "algorithm": "RandomForestClassifier",
+  "accuracy": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
+  "macro_f1": 1.0,
+  "total_training_samples": 2000,
+  "total_test_samples": 500,
+  "features": [
+    "cpu_utilization_pct",
+    "memory_utilization_pct",
+    "packet_loss_rate_pct",
+    "latency_ms",
+    "jitter_ms",
+    "bandwidth_utilization_pct",
+    "interface_error_rate",
+    "active_connections",
+    "device_temperature_c"
+  ],
+  "labels": [
+    "normal",
+    "congestion",
+    "packet_loss",
+    "latency_spike",
+    "hardware_failure"
+  ],
+  "confusion_matrix": [
+    [
+      100,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      100,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      100,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      100,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      100
+    ]
+  ],
+  "per_class_metrics": {
+    "normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 100
+    },
+    "congestion": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 100
+    },
+    "packet_loss": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 100
+    },
+    "latency_spike": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 100
+    },
+    "hardware_failure": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 100
+    }
+  },
+  "trained_at": "2026-10-10T08:04:59.003131",
+  "provenance": "Synthetic Network Simulation",
+  "evaluation_methodology": "Stratified 80/20 hold-out split on independently seeded simulated telemetry. This measures performance on samples from the same simulator distribution; it is not evidence of production-network accuracy.",
+  "is_synthetic": true
+}

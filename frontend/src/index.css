@@ -1,88 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
-  background-color: #030712;
-  color: #f1f5f9;
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  background-color: #F8F9FA;
+  color: #1E293B;
+  font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Antigravity Spatial Glass Utilities */
-.spatial-glass {
-  background: rgba(11, 15, 25, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+/* NMS Professional Panel Utilities */
+.nms-panel {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
-.spatial-glass-subtle {
-  background: rgba(17, 24, 39, 0.45);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.spatial-glass-crimson {
-  background: rgba(244, 63, 94, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(244, 63, 94, 0.35);
-  box-shadow: 0 0 35px -5px rgba(244, 63, 94, 0.3);
-}
-
-.spatial-glass-cyan {
-  background: rgba(6, 182, 212, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.25);
+.nms-panel-header {
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #F8F9FA;
+  padding: 0.75rem 1rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f293d;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
-}
-
-/* Gravitational Shockwave Rings */
-@keyframes sinkhole-pulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  50% { opacity: 0.4; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-
-.gravitational-ring-1 {
-  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-}
-
-.gravitational-ring-2 {
-  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.7s;
-}
-
-.gravitational-ring-3 {
-  animation: sinkhole-pulse 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.4s;
+  background: #94A3B8;
 }

@@ -6,6 +6,8 @@ from app.database import get_db
 from app.models.device import Device
 from app.models.telemetry import TelemetryMetric
 from app.services.simulation_service import SimulationEngine
+from app.dependencies.auth import require_role, get_current_user
+from app.models.user import User
 from app.schemas.telemetry_schema import (
     SimulationScenarioRequest,
     SimulationScenarioResponse,
@@ -19,7 +21,8 @@ router = APIRouter(prefix="", tags=["Telemetry & Simulation"])
 @router.post("/simulation/scenario", response_model=SimulationScenarioResponse)
 def inject_simulation_scenario(
     req: SimulationScenarioRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    operator: User = Depends(require_role("operator"))
 ):
     """Triggers a deterministic network fault scenario or normal baseline."""
     try:
@@ -39,7 +42,10 @@ def inject_simulation_scenario(
 
 
 @router.post("/simulation/reset", response_model=SimulationScenarioResponse)
-def reset_simulation(db: Session = Depends(get_db)):
+def reset_simulation(
+    db: Session = Depends(get_db),
+    operator: User = Depends(require_role("operator"))
+):
     """Resets all network devices to nominal baseline operating conditions."""
     res = SimulationEngine.apply_scenario(db, "normal")
     return SimulationScenarioResponse(
@@ -54,7 +60,8 @@ def reset_simulation(db: Session = Depends(get_db)):
 def get_telemetry_history(
     device_id: str = Query(..., description="Device identifier, e.g. rtr-core-01"),
     limit: int = Query(30, ge=1, le=200),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Retrieves time series telemetry metrics for charting."""
     device = db.query(Device).filter(Device.id == device_id).first()

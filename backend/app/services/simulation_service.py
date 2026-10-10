@@ -34,6 +34,7 @@ class SimulationEngine:
     def generate_metric_sample(
         scenario: str,
         base_capacity_multiplier: float = 1.0,
+        ambient_temp_offset: float = 0.0,
         seed: Optional[int] = None
     ) -> Dict[str, float]:
         """
@@ -50,55 +51,60 @@ class SimulationEngine:
             jitter = rng.uniform(0.1, 0.9)
             bw = rng.uniform(15.0, 42.0)
             err_rate = 0.0
-            active_conns = int(rng.uniform(80, 220))
-            temp = rng.uniform(38.0, 48.0)
+            active_conns = int(rng.uniform(80, 220) * base_capacity_multiplier)
+            temp = rng.uniform(38.0, 48.0) + ambient_temp_offset
 
         elif scenario == "congestion":
-            bw = rng.uniform(88.0, 99.5)
+            bw = rng.uniform(88.0, 99.9)
             # M/M/1 queueing delay exponential surge as utilization approaches 100%
             load_factor = bw / 100.0
             queue_multiplier = min(15.0, 1.0 / max(0.01, 1.0 - load_factor))
-            latency = min(350.0, rng.uniform(35.0, 60.0) * (queue_multiplier / 3.0))
-            jitter = rng.uniform(8.0, 26.0)
-            loss = rng.uniform(1.5, 6.5)  # buffer tail drops
-            cpu = rng.uniform(55.0, 78.0)
-            ram = rng.uniform(60.0, 82.0)
-            err_rate = rng.uniform(2.0, 9.0)
-            active_conns = int(rng.uniform(400, 950))
-            temp = rng.uniform(52.0, 66.0)
+            # Latency can overlap with pure latency_spike
+            latency = min(450.0, rng.uniform(40.0, 70.0) * (queue_multiplier / 2.5))
+            jitter = rng.uniform(10.0, 40.0)
+            # Buffer tail drops overlap with pure packet_loss
+            loss = rng.uniform(2.0, 14.0) 
+            cpu = rng.uniform(65.0, 95.0) # CPU can spike under heavy load, overlapping hardware_failure
+            ram = rng.uniform(60.0, 90.0)
+            err_rate = rng.uniform(2.0, 12.0)
+            active_conns = int(rng.uniform(400, 1200) * base_capacity_multiplier)
+            temp = rng.uniform(52.0, 75.0) + ambient_temp_offset
 
         elif scenario == "packet_loss":
-            loss = rng.uniform(12.0, 38.0)
-            err_rate = rng.uniform(25.0, 95.0)  # CRC / framing errors
-            latency = rng.uniform(14.0, 38.0)
-            jitter = rng.uniform(3.0, 12.0)
-            bw = rng.uniform(18.0, 45.0)
-            cpu = rng.uniform(20.0, 45.0)
-            ram = rng.uniform(25.0, 50.0)
-            active_conns = int(rng.uniform(70, 160))
-            temp = rng.uniform(40.0, 50.0)
+            # Loss heavily overlaps with congestion and hardware_failure tails
+            loss = rng.uniform(8.0, 38.0)
+            err_rate = rng.uniform(15.0, 95.0)  # CRC / framing errors
+            latency = rng.uniform(20.0, 120.0)
+            jitter = rng.uniform(5.0, 25.0)
+            bw = rng.uniform(18.0, 65.0)
+            cpu = rng.uniform(20.0, 65.0)
+            ram = rng.uniform(25.0, 60.0)
+            active_conns = int(rng.uniform(70, 200) * base_capacity_multiplier)
+            temp = rng.uniform(40.0, 55.0) + ambient_temp_offset
 
         elif scenario == "latency_spike":
-            latency = rng.uniform(160.0, 480.0)
-            jitter = rng.uniform(35.0, 110.0)
-            loss = rng.uniform(2.5, 9.0)
-            bw = rng.uniform(30.0, 60.0)
-            cpu = rng.uniform(30.0, 58.0)
-            ram = rng.uniform(30.0, 55.0)
-            err_rate = rng.uniform(1.0, 6.0)
-            active_conns = int(rng.uniform(60, 140))
-            temp = rng.uniform(42.0, 52.0)
+            # Pure latency overlaps with congestion-induced queuing delay
+            latency = rng.uniform(120.0, 550.0)
+            jitter = rng.uniform(35.0, 150.0)
+            loss = rng.uniform(2.5, 12.0)
+            bw = rng.uniform(30.0, 85.0)
+            cpu = rng.uniform(30.0, 70.0)
+            ram = rng.uniform(30.0, 65.0)
+            err_rate = rng.uniform(1.0, 8.0)
+            active_conns = int(rng.uniform(60, 250) * base_capacity_multiplier)
+            temp = rng.uniform(42.0, 60.0) + ambient_temp_offset
 
         elif scenario == "hardware_failure":
-            cpu = rng.uniform(93.0, 99.9)
-            ram = rng.uniform(91.0, 98.8)
-            temp = rng.uniform(82.0, 96.0)
-            loss = rng.uniform(8.0, 28.0)
-            latency = rng.uniform(80.0, 250.0)
-            jitter = rng.uniform(20.0, 65.0)
-            bw = rng.uniform(10.0, 40.0)
-            err_rate = rng.uniform(15.0, 60.0)
-            active_conns = int(rng.uniform(20, 80))  # dropping connections
+            cpu = rng.uniform(85.0, 99.9) # Can overlap with congestion
+            ram = rng.uniform(85.0, 99.9)
+            temp = rng.uniform(75.0, 96.0)
+            loss = rng.uniform(5.0, 28.0)
+            latency = rng.uniform(60.0, 300.0)
+            jitter = rng.uniform(20.0, 85.0)
+            bw = rng.uniform(10.0, 50.0)
+            err_rate = rng.uniform(10.0, 60.0)
+            active_conns = int(rng.uniform(10, 80) * base_capacity_multiplier)  # dropping connections
+            temp = temp + ambient_temp_offset
 
         else:
             raise ValueError(f"Unknown scenario: {scenario}")

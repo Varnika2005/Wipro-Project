@@ -64,137 +64,139 @@ export const RemediationSandbox: React.FC<RemediationSandboxProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="p-5 rounded-xl bg-noc-surface border border-noc-border">
-        <div className="flex items-center space-x-2 mb-1">
-          <Wrench className="w-5 h-5 text-noc-cyan" />
-          <h2 className="text-base font-bold text-white">Safe Remediation Digital Twin Sandbox</h2>
+    <div className="space-y-6 max-w-5xl mx-auto w-full">
+      <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-sm">
+        <div className="flex items-center space-x-2 mb-2 border-b border-slate-100 pb-4">
+          <Wrench className="w-5 h-5 text-nms-primary" />
+          <h2 className="text-base font-bold text-slate-800 uppercase tracking-wider font-mono">Remediation Sandbox</h2>
         </div>
-        <p className="text-xs text-slate-400">
-          Simulate counterfactual corrective actions safely without altering real operational infrastructure.
+        <p className="text-sm text-slate-500 mb-6">
+          Simulate corrective actions safely before applying to the operational infrastructure.
         </p>
 
         {/* Action Configuration Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Target Device</label>
-            <select
-              value={targetDevice}
-              onChange={(e) => {
-                setTargetDevice(e.target.value);
-                setSimResult(null);
-              }}
-              className="w-full px-3 py-2 rounded-lg bg-noc-card border border-noc-border text-slate-200 text-xs font-mono focus:outline-none focus:border-noc-cyan"
-            >
-              {devices.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} ({d.id}) - Status: {d.status}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="bg-slate-50 p-5 rounded-lg border border-slate-100 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Target Device</label>
+              <select
+                value={targetDevice}
+                onChange={(e) => {
+                  setTargetDevice(e.target.value);
+                  setSimResult(null);
+                }}
+                className="w-full px-4 py-2.5 rounded bg-white border border-slate-300 text-slate-800 text-sm font-mono focus:outline-none focus:border-nms-primary focus:ring-1 focus:ring-nms-primary shadow-sm"
+              >
+                {devices.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} ({d.id}) - Status: {d.status}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Proposed Corrective Policy</label>
-            <select
-              value={actionType}
-              onChange={(e) => {
-                setActionType(e.target.value);
-                setSimResult(null);
-              }}
-              className="w-full px-3 py-2 rounded-lg bg-noc-card border border-noc-border text-slate-200 text-xs focus:outline-none focus:border-noc-cyan"
-            >
-              {policies.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Proposed Corrective Policy</label>
+              <select
+                value={actionType}
+                onChange={(e) => {
+                  setActionType(e.target.value);
+                  setSimResult(null);
+                }}
+                className="w-full px-4 py-2.5 rounded bg-white border border-slate-300 text-slate-800 text-sm focus:outline-none focus:border-nms-primary focus:ring-1 focus:ring-nms-primary shadow-sm"
+              >
+                {policies.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="mt-5 flex items-center space-x-3">
+        <div className="flex justify-end">
           <button
             onClick={handleSimulate}
             disabled={isSimulating}
-            className="flex items-center space-x-2 px-4 py-2 bg-noc-cyan hover:bg-cyan-400 text-slate-950 font-bold rounded-lg text-xs shadow-glow-cyan transition-all disabled:opacity-50"
+            className="flex items-center space-x-2 px-6 py-2.5 bg-nms-primary hover:bg-nms-primaryHover text-white font-bold rounded text-sm transition-all shadow-sm disabled:opacity-50"
           >
-            <Play className={`w-3.5 h-3.5 ${isSimulating ? 'animate-spin' : ''}`} />
-            <span>{isSimulating ? 'Evaluating Model...' : 'Simulate Policy (Safe Digital Twin)'}</span>
+            <Play className={`w-4 h-4 ${isSimulating ? 'animate-spin' : ''}`} />
+            <span>{isSimulating ? 'Evaluating...' : 'Simulate Policy'}</span>
           </button>
         </div>
       </div>
 
       {/* Success Notification */}
       {applyMessage && (
-        <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/50 flex items-center space-x-3 text-xs text-emerald-300">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-green-50 border border-green-200 flex items-center space-x-3 text-xs text-green-700">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
           <span>{applyMessage}</span>
         </div>
       )}
 
       {/* Simulation Results Card */}
       {simResult && (
-        <div className="p-6 rounded-xl bg-noc-card border border-cyan-500/40 shadow-glow-cyan space-y-5 animate-in fade-in">
-          <div className="flex items-center justify-between pb-3 border-b border-noc-border">
+        <div className="p-6 rounded-xl bg-white border border-blue-200 shadow-sm space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center space-x-2">
-              <ShieldCheck className="w-5 h-5 text-noc-cyan" />
-              <h3 className="text-sm font-bold text-white">Projected Digital Twin Impact Analysis</h3>
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-bold text-slate-800">Projected Impact Analysis</h3>
             </div>
-            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-cyan-950 text-noc-cyan border border-cyan-800">
-              NON-DESTRUCTIVE SIMULATION
+            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              SIMULATION RESULTS
             </span>
           </div>
 
           {/* Risk Score Delta */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-noc-surface border border-noc-border text-center">
-              <div className="text-xs text-slate-400">Current Risk Index</div>
-              <div className="text-3xl font-black text-rose-400 mt-1">{simResult.current_risk_score}</div>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
+              <div className="text-xs font-bold text-slate-600">Current Risk Index</div>
+              <div className="text-3xl font-black text-red-600 mt-1">{simResult.current_risk_score}</div>
               <div className="text-[10px] text-slate-500">Unmitigated State</div>
             </div>
 
-            <div className="p-4 rounded-xl bg-noc-surface border border-noc-border text-center flex flex-col items-center justify-center">
-              <div className="text-xs font-semibold text-emerald-400 flex items-center space-x-1">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col items-center justify-center">
+              <div className="text-xs font-bold text-green-600 flex items-center space-x-1">
                 <ArrowDownRight className="w-4 h-4" />
                 <span>-{simResult.risk_reduction_pct}% Risk Reduction</span>
               </div>
-              <div className="text-[11px] text-slate-400 mt-1 font-mono">
+              <div className="text-[11px] text-slate-500 mt-1 font-mono">
                 Confidence: {(simResult.resolution_confidence * 100).toFixed(1)}%
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-noc-surface border border-noc-border text-center">
-              <div className="text-xs text-slate-400">Projected Risk Index</div>
-              <div className="text-3xl font-black text-emerald-400 mt-1">{simResult.projected_risk_score}</div>
-              <div className="text-[10px] text-slate-500 font-semibold uppercase text-emerald-400">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
+              <div className="text-xs font-bold text-slate-600">Projected Risk Index</div>
+              <div className="text-3xl font-black text-green-600 mt-1">{simResult.projected_risk_score}</div>
+              <div className="text-[10px] font-bold uppercase text-green-700">
                 Target Status: {simResult.projected_status}
               </div>
             </div>
           </div>
 
           {/* Rationale & Safety Analysis */}
-          <div className="p-4 rounded-xl bg-noc-surface border border-noc-border space-y-2 text-xs">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
             <div>
-              <span className="font-semibold text-cyan-300">Technical Rationale: </span>
-              <span className="text-slate-300">{simResult.remediation_rationale}</span>
+              <span className="font-bold text-slate-700">Technical Rationale: </span>
+              <span className="text-slate-600">{simResult.remediation_rationale}</span>
             </div>
             <div>
-              <span className="font-semibold text-emerald-300">Safety Assessment: </span>
-              <span className="text-slate-300">{simResult.safety_assessment}</span>
+              <span className="font-bold text-slate-700">Safety Assessment: </span>
+              <span className="text-slate-600">{simResult.safety_assessment}</span>
             </div>
           </div>
 
           {/* Commit Action */}
           <div className="flex items-center justify-between pt-2">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500">
               Satisfied with simulation projection? Apply changes to production.
             </span>
             <button
               onClick={handleApply}
               disabled={isApplying}
-              className="flex items-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow-glow-emerald transition-all disabled:opacity-50"
+              className="flex items-center space-x-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-xs transition-all disabled:opacity-50"
             >
               <CheckCircle2 className={`w-4 h-4 ${isApplying ? 'animate-spin' : ''}`} />
               <span>{isApplying ? 'Applying Action...' : 'Commit & Resolve Fault'}</span>

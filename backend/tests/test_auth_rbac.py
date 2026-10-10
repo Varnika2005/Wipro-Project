@@ -1,4 +1,8 @@
 import pytest
+import os
+os.environ["INITIAL_ADMIN_PASSWORD"] = "Admin@NetSentinel2026!"
+os.environ["INITIAL_OPERATOR_PASSWORD"] = "Operator@NetSentinel2026!"
+os.environ["INITIAL_VIEWER_PASSWORD"] = "Viewer@NetSentinel2026!"
 from fastapi.testclient import TestClient
 from app.main import app
 from app.database import Base, engine, SessionLocal

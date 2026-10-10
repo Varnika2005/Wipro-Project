@@ -2,14 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/common/Header';
 import { HealthOverview } from './components/dashboard/HealthOverview';
 import { SpatialTopology } from './components/topology/SpatialTopology';
-import { DeviceDrawer } from './components/topology/DeviceDrawer';
-import { TelemetryTrends } from './components/dashboard/TelemetryTrends';
+import { DeviceInspector } from './components/topology/DeviceInspector';
 import { ScenarioControl } from './components/simulation/ScenarioControl';
-import { SpatialHoloVisor } from './components/ml/SpatialHoloVisor';
-import { ModelEvaluationView } from './components/ml/ModelEvaluationView';
-import { AlarmCorrelationTree } from './components/rca/AlarmCorrelationTree';
-import { RemediationSandbox } from './components/simulation/RemediationSandbox';
 import { GatekeeperModal } from './components/auth/GatekeeperModal';
+
+const TelemetryTrends = React.lazy(() => import('./components/dashboard/TelemetryTrends').then(m => ({ default: m.TelemetryTrends })));
+const SpatialHoloVisor = React.lazy(() => import('./components/ml/SpatialHoloVisor').then(m => ({ default: m.SpatialHoloVisor })));
+const ModelEvaluationView = React.lazy(() => import('./components/ml/ModelEvaluationView').then(m => ({ default: m.ModelEvaluationView })));
+const AlarmCorrelationTree = React.lazy(() => import('./components/rca/AlarmCorrelationTree').then(m => ({ default: m.AlarmCorrelationTree })));
+const RemediationSandbox = React.lazy(() => import('./components/simulation/RemediationSandbox').then(m => ({ default: m.RemediationSandbox })));
+const HelpGuide = React.lazy(() => import('./components/common/HelpGuide').then(m => ({ default: m.HelpGuide })));
 
 import { topologyApi, DeviceDetailResponse } from './api/topologyApi';
 import { telemetryApi } from './api/telemetryApi';
@@ -24,12 +26,11 @@ import { PredictionResult, EvaluationReport } from './types/ml';
 import { RCAResponse } from './types/rca';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'ml' | 'rca' | 'sandbox'>('overview');
   const [devices, setDevices] = useState<Device[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
   const [summary, setSummary] = useState<TopologySummary | null>(null);
 
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>('rtr-core-01');
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [selectedDeviceDetails, setSelectedDeviceDetails] = useState<DeviceDetailResponse | null>(null);
   const [deviceHistory, setDeviceHistory] = useState<TelemetryMetric[]>([]);
 
@@ -45,7 +46,6 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isResetting, setIsResetting] = useState<boolean>(false);
   const [isTraining, setIsTraining] = useState<boolean>(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   // Configure Global Auth Listeners for silent refresh & 403 elevation prompts
   useEffect(() => {
@@ -70,13 +70,7 @@ export const App: React.FC = () => {
         const user = await authApi.getMe();
         setCurrentUser(user);
       } catch (err) {
-        // Auto-authenticate as default Admin for seamless initial boot
-        try {
-          const user = await authApi.login('admin', 'Admin@NetSentinel2026!');
-          setCurrentUser(user);
-        } catch {
-          setIsGatekeeperOpen(true);
-        }
+        setIsGatekeeperOpen(true);
       }
     };
     checkSession();
@@ -161,7 +155,7 @@ export const App: React.FC = () => {
   const handleInjectScenario = async (scenario: ScenarioType, targetId: string) => {
     setIsLoading(true);
     try {
-      await telemetryApi.injectScenario(scenario, targetId, 60);
+      await telemetryApi.injectScenario(scenario, targetId);
       await fetchTopology();
       await fetchRCA();
       await fetchDeviceData(targetId);
@@ -199,6 +193,7 @@ export const App: React.FC = () => {
       if (selectedDeviceId) {
         await fetchDeviceData(selectedDeviceId);
       }
+      alert('Model retraining completed successfully.');
     } catch (err: any) {
       alert(`Training failed: ${err.message}`);
     } finally {
@@ -218,18 +213,13 @@ export const App: React.FC = () => {
 
   const selectedDevice = devices.find((d) => d.id === selectedDeviceId) || null;
 
-  return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col font-sans relative selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Background Cosmic Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/[0.08] rounded-full blur-[160px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-900/[0.06] rounded-full blur-[180px]" />
-      </div>
+  type TabType = 'overview' | 'network' | 'predictions' | 'incidents' | 'remediation' | 'model' | 'help';
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
 
+  return (
+    <div className="min-h-screen bg-nms-background text-nms-text flex flex-col font-sans relative selection:bg-nms-primary/30 selection:text-nms-primaryHover">
       <Header
         summary={summary}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
         onReset={handleReset}
         isResetting={isResetting}
         currentUser={currentUser}
@@ -237,78 +227,176 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full z-10">
-        {/* KPI Health Overview Banner */}
-        <HealthOverview summary={summary} />
+      {/* Navigation Tabs */}
+      <div className="bg-nms-surface border-b border-nms-border px-4 md:px-6">
+        <div className="max-w-7xl mx-auto flex space-x-1 overflow-x-auto">
+          {(['overview', 'network', 'predictions', 'incidents', 'remediation', 'model', 'help'] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-3 text-sm font-medium capitalize border-b-2 whitespace-nowrap transition-colors ${
+                activeTab === tab
+                  ? 'border-nms-primary text-nms-primary'
+                  : 'border-transparent text-nms-textMuted hover:text-nms-text hover:border-nms-border'
+              }`}
+            >
+              {tab.replace('-', ' ')}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* Tab 1: Spatial Topology & Monitoring Overview */}
+      <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full z-10 flex flex-col space-y-6">
+        <React.Suspense fallback={<div className="p-12 text-center text-nms-textMuted font-mono border border-nms-border bg-white rounded">Loading module...</div>}>
+        
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Network Topology Map */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-                    Antigravity Spatial Topography Canvas
+            <HealthOverview summary={summary} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 nms-panel flex flex-col">
+                <div className="nms-panel-header">
+                  <h2 className="text-sm font-bold text-nms-text uppercase tracking-wider font-mono">
+                    Network Topography Canvas
                   </h2>
-                  <p className="text-xs text-slate-400">
-                    Weightless levitation physics, kinetic fiber beams, and gravitational failure distortion fields.
-                  </p>
                 </div>
-                {selectedDeviceId && (
-                  <button
-                    onClick={() => setIsDrawerOpen(true)}
-                    className="px-3.5 py-1.5 spatial-glass rounded-xl text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 hover:border-cyan-400 shadow-glow-cyan transition-all"
-                  >
-                    Inspect Node Visor ({selectedDeviceId})
-                  </button>
-                )}
+                <div className="flex-1 p-0 relative rounded-b-lg min-h-[500px]">
+                  <SpatialTopology
+                    devices={devices}
+                    links={links}
+                    selectedDeviceId={selectedDeviceId}
+                    onSelectDevice={(id) => {
+                      setSelectedDeviceId(id);
+                      setActiveTab('network');
+                    }}
+                    rootCauseDevices={rcaData?.root_cause_devices || []}
+                    symptomDevices={rcaData?.cascading_symptoms?.map((s) => s.device_id) || []}
+                  />
+                </div>
               </div>
-
-              <SpatialTopology
-                devices={devices}
-                links={links}
-                selectedDeviceId={selectedDeviceId}
-                onSelectDevice={(id) => {
-                  setSelectedDeviceId(id);
-                  setIsDrawerOpen(true);
-                }}
-                rootCauseDevices={rcaData?.root_cause_devices || []}
-                symptomDevices={rcaData?.cascading_symptoms?.map((s) => s.device_id) || []}
-              />
-            </div>
-
-            {/* Scenario Injection Control Panel */}
-            <ScenarioControl
-              devices={devices}
-              selectedDeviceId={selectedDeviceId}
-              onSelectDeviceId={(id) => setSelectedDeviceId(id)}
-              onInject={handleInjectScenario}
-              onReset={handleReset}
-              isLoading={isLoading}
-            />
-
-            {/* Real-time Telemetry Trends */}
-            <div className="space-y-2">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-                Interface Flux & Historical Telemetry ({selectedDevice?.name || selectedDeviceId})
-              </h2>
-              <TelemetryTrends
-                metrics={deviceHistory}
-                deviceName={selectedDevice?.name || selectedDeviceId || 'Selected Node'}
-              />
+              <div className="lg:col-span-1 space-y-6 flex flex-col">
+                <ScenarioControl
+                  devices={devices}
+                  selectedDeviceId={null}
+                  onSelectDeviceId={(id) => {
+                    setSelectedDeviceId(id);
+                    setActiveTab('network');
+                  }}
+                  onInject={handleInjectScenario}
+                  onReset={handleReset}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Tab 2: AI Fault Predictor & Model Evaluation Hub */}
-        {activeTab === 'ml' && (
-          <div className="space-y-6">
-            <SpatialHoloVisor
-              prediction={prediction}
-              deviceName={selectedDevice?.name || selectedDeviceId || 'Device'}
-            />
+        {activeTab === 'network' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 xl:col-span-9 flex flex-col space-y-6">
+              <div className="nms-panel flex flex-col h-[600px]">
+                <div className="nms-panel-header">
+                  <h2 className="text-sm font-bold text-nms-text uppercase tracking-wider font-mono">
+                    Interactive Topology
+                  </h2>
+                </div>
+                <div className="flex-1 relative">
+                   <SpatialTopology
+                      devices={devices}
+                      links={links}
+                      selectedDeviceId={selectedDeviceId}
+                      onSelectDevice={setSelectedDeviceId}
+                      rootCauseDevices={rcaData?.root_cause_devices || []}
+                      symptomDevices={rcaData?.cascading_symptoms?.map((s) => s.device_id) || []}
+                    />
+                </div>
+              </div>
+            </div>
 
+            <div className="lg:col-span-4 xl:col-span-3 flex flex-col space-y-6">
+              {selectedDeviceId ? (
+                <>
+                  <div className="flex justify-between items-center nms-panel-header bg-white border border-nms-border rounded-lg">
+                    <span className="text-xs font-mono font-bold text-nms-text">Target Node Context</span>
+                    <button
+                      onClick={() => setSelectedDeviceId(null)}
+                      className="text-[10px] uppercase font-bold text-nms-textMuted hover:text-nms-text py-1 px-2 border border-nms-border rounded"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <DeviceInspector
+                    device={selectedDevice}
+                    onClose={() => setSelectedDeviceId(null)}
+                    alarms={selectedDeviceDetails?.recent_alarms || []}
+                    latestTelemetry={selectedDeviceDetails?.latest_telemetry || null}
+                    onOpenPrediction={() => setActiveTab('predictions')}
+                    onOpenRemediation={() => setActiveTab('remediation')}
+                  />
+                  <TelemetryTrends
+                    metrics={deviceHistory}
+                    deviceName={selectedDevice?.name || selectedDeviceId}
+                  />
+                </>
+              ) : (
+                <div className="nms-panel p-6 text-center text-nms-textMuted">
+                  Select a device from the topology to view details.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'predictions' && (
+          <div className="max-w-7xl mx-auto w-full">
+            {selectedDeviceId ? (
+              <SpatialHoloVisor
+                prediction={prediction}
+                deviceName={selectedDevice?.name || selectedDeviceId}
+              />
+            ) : (
+              <div className="nms-panel p-12 text-center text-nms-textMuted font-mono">
+                Please select a target node in the Network tab to view predictions.
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'incidents' && (
+          <div className="max-w-7xl mx-auto w-full">
+            <AlarmCorrelationTree
+              rcaData={rcaData}
+              onSelectDevice={(id) => {
+                setSelectedDeviceId(id);
+                setActiveTab('network');
+              }}
+            />
+          </div>
+        )}
+
+        {activeTab === 'remediation' && (
+          <div className="max-w-7xl mx-auto w-full">
+            {selectedDeviceId ? (
+              <RemediationSandbox
+                devices={devices}
+                selectedDeviceId={selectedDeviceId}
+                onRemediationApplied={async () => {
+                  await fetchTopology();
+                  await fetchRCA();
+                  if (selectedDeviceId) {
+                    await fetchDeviceData(selectedDeviceId);
+                  }
+                }}
+              />
+            ) : (
+              <div className="nms-panel p-12 text-center text-nms-textMuted font-mono">
+                Please select a target node in the Network tab to simulate remediation.
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'model' && (
+          <div className="max-w-7xl mx-auto w-full">
             <ModelEvaluationView
               evaluation={evaluation}
               onRetrain={handleRetrain}
@@ -317,53 +405,16 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Tab 3: RCA & Alarm Correlation */}
-        {activeTab === 'rca' && (
-          <AlarmCorrelationTree
-            rcaData={rcaData}
-            onSelectDevice={(id) => {
-              setSelectedDeviceId(id);
-              setActiveTab('overview');
-              setIsDrawerOpen(true);
-            }}
-          />
+        {activeTab === 'help' && (
+          <div className="w-full max-w-4xl mx-auto">
+            <HelpGuide />
+          </div>
         )}
-
-        {/* Tab 4: Remediation Sandbox */}
-        {activeTab === 'sandbox' && (
-          <RemediationSandbox
-            devices={devices}
-            selectedDeviceId={selectedDeviceId}
-            onRemediationApplied={async () => {
-              await fetchTopology();
-              await fetchRCA();
-              if (selectedDeviceId) {
-                await fetchDeviceData(selectedDeviceId);
-              }
-            }}
-          />
-        )}
+        
+        </React.Suspense>
       </main>
 
-      {/* Side Slide-Out Device Drawer */}
-      {isDrawerOpen && (
-        <DeviceDrawer
-          device={selectedDevice}
-          onClose={() => setIsDrawerOpen(false)}
-          alarms={selectedDeviceDetails?.recent_alarms || []}
-          latestTelemetry={selectedDeviceDetails?.latest_telemetry || null}
-          onOpenPrediction={() => {
-            setIsDrawerOpen(false);
-            setActiveTab('ml');
-          }}
-          onOpenRemediation={() => {
-            setIsDrawerOpen(false);
-            setActiveTab('sandbox');
-          }}
-        />
-      )}
-
-      {/* Gatekeeper Spatial Authentication Modal */}
+      {/* Gatekeeper Authentication Modal */}
       <GatekeeperModal
         isOpen={isGatekeeperOpen}
         onSuccess={(user) => {

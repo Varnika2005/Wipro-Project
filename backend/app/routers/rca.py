@@ -3,13 +3,18 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.services.rca_service import RCAService
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 from app.schemas.rca_schema import RCAResponse, IncidentOut, AlarmOut
 
 router = APIRouter(prefix="/rca", tags=["Root Cause Analysis"])
 
 
 @router.get("/correlate", response_model=RCAResponse)
-def correlate_network_alarms(db: Session = Depends(get_db)):
+def correlate_network_alarms(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     Performs graph-based alarm storm correlation, traces topological blast radius,
     and isolates primary root-cause devices from cascading symptoms.

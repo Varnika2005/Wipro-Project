@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Literal
 from datetime import datetime
 from app.schemas.telemetry_schema import TelemetryFeatures
 
 
 class FeatureContribution(BaseModel):
     feature_name: str
+    friendly_name: Optional[str] = None
     feature_value: float
     importance_pct: float
     direction: str  # "increases_risk" or "decreases_risk"
@@ -30,9 +31,9 @@ class PredictionResponse(BaseModel):
 
 
 class TrainRequest(BaseModel):
-    model_type: str = "random_forest"  # "random_forest" or "gradient_boosting"
-    samples_per_class: int = 400
-    test_split: float = 0.2
+    model_type: Literal["random_forest", "gradient_boosting"] = "random_forest"
+    samples_per_class: int = Field(default=400, ge=20, le=5000)
+    test_split: float = Field(default=0.2, gt=0.05, lt=0.5)
     random_seed: int = 42
 
 
@@ -50,8 +51,13 @@ class EvaluationReportResponse(BaseModel):
     macro_precision: float
     macro_recall: float
     macro_f1: float
+    total_training_samples: int
     total_test_samples: int
+    features: List[str]
     labels: List[str]
     confusion_matrix: List[List[int]]
     per_class_metrics: Dict[str, ClassMetric]
     trained_at: datetime
+    provenance: str
+    evaluation_methodology: str
+    is_synthetic: bool

@@ -8,7 +8,7 @@ from app.services.simulation_service import SimulationEngine
 
 def test_dataset_generation():
     samples_per_class = 60
-    df, y = MLService.generate_training_dataset(samples_per_class=samples_per_class, random_seed=42)
+    df, y = MLService.generate_dataset(samples_per_class=samples_per_class, random_seed=42)
     
     assert len(df) == samples_per_class * len(TARGET_CLASSES)
     assert len(y) == samples_per_class * len(TARGET_CLASSES)

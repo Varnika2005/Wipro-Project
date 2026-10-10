@@ -8,9 +8,10 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from app.models.user import User, TokenRevocation, AuditLog
+from app.config import settings
 
 # Security configuration
-JWT_SECRET_KEY = "netsentinel-super-secret-antigravity-spatial-key-2026"
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7

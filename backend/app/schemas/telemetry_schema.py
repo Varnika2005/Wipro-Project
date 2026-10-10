@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime
 
 
@@ -24,9 +24,8 @@ class TelemetryOut(TelemetryFeatures):
 
 
 class SimulationScenarioRequest(BaseModel):
-    scenario: str  # "normal", "congestion", "packet_loss", "latency_spike", "hardware_failure"
+    scenario: Literal["normal", "congestion", "packet_loss", "latency_spike", "hardware_failure"]
     target_device_id: Optional[str] = None
-    duration_seconds: int = 60
 
 
 class SimulationScenarioResponse(BaseModel):

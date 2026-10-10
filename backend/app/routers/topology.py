@@ -5,6 +5,8 @@ from typing import List
 from app.database import get_db
 from app.models.device import Device, Link
 from app.models.alarm import AlarmEvent
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 from app.schemas.topology_schema import (
     TopologyResponse, DeviceOut, LinkOut, TopologySummary
 )
@@ -13,7 +15,10 @@ router = APIRouter(prefix="/topology", tags=["Topology"])
 
 
 @router.get("", response_model=TopologyResponse)
-def get_topology(db: Session = Depends(get_db)):
+def get_topology(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Fetches the complete network graph, active device statuses, and link edges."""
     devices = db.query(Device).all()
     links = db.query(Link).all()
@@ -43,7 +48,11 @@ def get_topology(db: Session = Depends(get_db)):
 
 
 @router.get("/devices/{device_id}")
-def get_device_details(device_id: str, db: Session = Depends(get_db)):
+def get_device_details(
+    device_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Returns detailed device information, active alarms, and latest telemetry."""
     device = db.query(Device).filter(Device.id == device_id).first()
     if not device:

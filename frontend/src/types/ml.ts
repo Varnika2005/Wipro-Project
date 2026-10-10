@@ -33,9 +33,14 @@ export interface EvaluationReport {
   macro_precision: number;
   macro_recall: number;
   macro_f1: number;
+  total_training_samples?: number;
   total_test_samples: number;
+  features?: string[];
   labels: string[];
   confusion_matrix: number[][];
   per_class_metrics: Record<string, ClassMetric>;
   trained_at: string;
+  provenance?: string;
+  evaluation_methodology?: string;
+  is_synthetic?: boolean;
 }
